@@ -24,7 +24,7 @@
   unarchive: src=jce_policy-8.zip dest=/tmp mode=0755
   tags: install
 
-- name: Install JCE in <JDK>/jre/lib/security
+- name: "Install JCE in {{ java_home }}/jre/lib/security"
   become: yes
-  shell: cp /tmp/UnlimitedJCEPolicyJDK8/*.jar /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.*/jre/lib/security
+  shell: "cp /tmp/UnlimitedJCEPolicyJDK8/*.jar {{ java_home }}/jre/lib/security"
   tags: install
