@@ -2,37 +2,22 @@
 - name: Add EPEL repository
   yum: name=epel-release
 
-- name: Install Java
-  yum: name={{item}} state=latest
-  with_items:
-       - java-1.8.0-openjdk
-
-- name: Install JNA
-  yum :
-     name: jna
-     state: present
+#Since firewalld is mandatory
+- name: Install firewalld, Java, JNA
+  become: true
+  yum: 
+    name: ['firewalld', 'java-1.8.0-openjdk', 'jna']
+    state: latest
 
 - name: Install Python PIP, wget, curl, jemalloc, unzip
-  yum: name={{item}} state=installed state=latest
-  with_items:
-   - python-pip
-   - wget
-   - curl
-   - jemalloc
-   - unzip
-   - jq
-   - pssh
+  yum:
+    name: ['python-pip','wget','curl','jemalloc','unzip','jq','pssh']
+    state: latest
 
 - name: Install perf monitoring tools
-  yum: name={{item}} state=installed state=latest
-  with_items:
-   - trafshow
-   - sysstat
-   - net-tools
-   - iotop
-   - dstat
-   - htop
-   - strace
+  yum:
+    name: ['trafshow','sysstat','net-tools','iotop','dstat','htop','strace'] 
+    state: latest
 
 - name: Unarchive JCE in /tmp
   become: yes
