@@ -1,9 +1,9 @@
 ---
-elassandra_version: "6.2.3.16"
-strapack_version: "6.2.3.16"
+elassandra_version: "6.8.4.11"
+strapack_version: "6.8.4.11"
 
-elassandra_rpm: "elassandra-{{ elassandra_version }}.rpm"
-elassandra_rpm_url: "https://github.com/strapdata/elassandra/releases/download/v{{ elassandra_version }}/elassandra-{{ elassandra_version }}.rpm"
+elassandra_rpm: "elassandra-{{ elassandra_version }}-1.noarch.rpm"
+elassandra_rpm_url: "https://github.com/strapdata/elassandra/releases/download/v{{ elassandra_version }}/{{ elassandra_rpm }}"
 strapack_zip_url: "https://cdn.repo.strapdata.com/enterprise/strapdata-enterprise-{{ strapack_version }}.zip"
 
 # Cassandra configuration
