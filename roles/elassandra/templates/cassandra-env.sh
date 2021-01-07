@@ -102,7 +102,7 @@ if [ "$JVM_VERSION" \< "1.8" ] && [ "$JVM_PATCH_VERSION" -lt 40 ] ; then
     exit 1;
 fi
 
-jvm=`echo "$java_ver_output" | grep -A 1 'java version' | awk 'NR==2 {print $1}'`
+jvm=`echo "$java_ver_output" | grep -A 1 '[openjdk|java] version' | awk 'NR==2 {print $1}'`
 case "$jvm" in
     OpenJDK)
         JVM_VENDOR=OpenJDK
@@ -230,9 +230,9 @@ fi
 # for more on configuring JMX through firewalls, etc. (Short version:
 # get it working with no firewall first.)
 #
-# Cassandra ships with JMX accessible *only* from localhost.
+# Cassandra ships with JMX accessible *only* from localhost.  
 # To enable remote JMX connections, uncomment lines below
-# with authentication and/or ssl enabled. See https://wiki.apache.org/cassandra/JmxSecurity
+# with authentication and/or ssl enabled. See https://wiki.apache.org/cassandra/JmxSecurity 
 #
 if [ "x$LOCAL_JMX" = "x" ]; then
     LOCAL_JMX=yes
@@ -304,11 +304,13 @@ JVM_OPTS="$JVM_OPTS $JVM_EXTRA_OPTS"
 JVM_OPTS="$JVM_OPTS -XX:+ExitOnOutOfMemoryError"
 
 {% if elassandra_influxdb is defined and elassandra_influxdb %}
-JVM_OPTS="$JVM_OPTS -Dcassandra.metricsReporterConfigFile=influxdb-reporting.yaml"
+
+ES_DISTRIBUTION_FLAVOR=oss
+ES_DISTRIBUTION_TYPE=rpm
 {% endif %}
 
-# ------ Elasticsearch settings --------
-# use old-style file permissions on JDK9
+JVM_OPTS="$JVM_OPTS -Des.distribution.flavor=$ES_DISTRIBUTION_FLAVOR"
+JVM_OPTS="$JVM_OPTS -Des.distribution.type=$ES_DISTRIBUTION_TYPE"
 # JVM_OPTS="$JVM_OPTS -Djdk.io.permissionsUseCanonicalPath=true"
 
 # Elasticsearch tmp directory.
@@ -324,8 +326,6 @@ if [ -z "$ES_TMPDIR" ]; then
   fi
 fi
 
-# ----- Elassandra settings --------
-
 #JVM_OPTS="$JVM_OPTS -Des.token_ranges_bitset_cache=true"
 JVM_OPTS="$JVM_OPTS -Dcassandra.custom_query_handler_class=org.elassandra.index.EnterpriseElasticQueryHandler"
-JVM_OPTS="$JVM_OPTS -javaagent:/usr/share/cassandra/agents/jmx_prometheus_javaagent-0.3.1.jar=7500:/etc/cassandra/jmx_prometheus_exporter.yml"
+JVM_OPTS="$JVM_OPTS -javaagent:/usr/share/cassandra/agents/jmx_prometheus_javaagent-0.13.0.jar=7500:/etc/cassandra/jmx_prometheus_exporter.yml"
