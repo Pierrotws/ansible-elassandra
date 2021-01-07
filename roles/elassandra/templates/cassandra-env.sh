@@ -304,10 +304,11 @@ JVM_OPTS="$JVM_OPTS $JVM_EXTRA_OPTS"
 JVM_OPTS="$JVM_OPTS -XX:+ExitOnOutOfMemoryError"
 
 {% if elassandra_influxdb is defined and elassandra_influxdb %}
+JVM_OPTS="$JVM_OPTS -Dcassandra.metricsReporterConfigFile=influxdb-reporting.yaml"
+{% endif %}
 
 ES_DISTRIBUTION_FLAVOR=oss
 ES_DISTRIBUTION_TYPE=rpm
-{% endif %}
 
 JVM_OPTS="$JVM_OPTS -Des.distribution.flavor=$ES_DISTRIBUTION_FLAVOR"
 JVM_OPTS="$JVM_OPTS -Des.distribution.type=$ES_DISTRIBUTION_TYPE"
