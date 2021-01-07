@@ -3,6 +3,7 @@
 #
 ---
 - name: Disable swap
+  become: true
   command: swapoff --all
   ignore_errors: no
 
