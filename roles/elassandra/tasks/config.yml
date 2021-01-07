@@ -36,7 +36,7 @@
   become: true
 
 - name: Copy /etc/cassandra/jmxremote.password
-  template: src=jmxremote.password dest=/etc/cassandra/jmxremote.password owner=cassandra group=cassandra mode=0400
+  template: src=jmxremote.password dest=/etc/cassandra/jmxremote.password owner={{ elassandra_user }} group={{ elassandra_group }} mode=0400
   become: true
 
 - name: Grant read access to /etc/cassandra/jmxremote.password
