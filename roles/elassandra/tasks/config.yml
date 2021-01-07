@@ -8,7 +8,6 @@
     elassandra_logs: "/var/log/cassandra"
     elassandra_data: "/var/lib/cassandra"
 
-
 #- name: "Add elassandra to /etc/hosts"
 #  lineinfile:
 #    dest: /etc/hosts
@@ -59,7 +58,7 @@
 #  become: true
 #  file: owner={{ elassandra_user }} group={{ elassandra_group }} mode=0664
 
-- name: ensure firewalld is started
+- name: Ensure firewalld is started
   become: true
   systemd:
     name: firewalld
@@ -89,7 +88,7 @@
     - 9200-9400/tcp
     - 7500/tcp
 
-- name: set permission on /var/log/cassandra and /var/lib/cassandra
+- name: Set permission on /var/log/cassandra and /var/lib/cassandra
   become: true
   file:
     path: "{{ item }}"
@@ -101,7 +100,7 @@
     - /var/log/cassandra
     - /var/lib/cassandra
 
-- name: ensure .cassandra directory exists
+- name: Ensure .cassandra directory exists
   become: true
   file:
     path: "{{ item.home }}/.cassandra"
@@ -113,7 +112,7 @@
     - { home: "/home/{{ remote_user }}", user: "{{ remote_user }}", group: "{{ remote_user }}" }
     - { home: /root, user: root, group: root }
 
-- name: "deploy cqlshrc for root and {{ remote_user }}"
+- name: "Deploy cqlshrc for root and {{ remote_user }}"
   become: true
   template:
     src: cqlshrc
@@ -125,7 +124,7 @@
     - { home: "/home/{{ remote_user }}", user: "{{ remote_user }}", group: "{{ remote_user }}" }
     - { home: /root, user: root, group: root }
 
-- name: "deploy nodetool-ssl.properties for root and {{ remote_user }}"
+- name: "Deploy nodetool-ssl.properties for root and {{ remote_user }}"
   become: true
   template:
     src: nodetool-ssl.properties
@@ -137,7 +136,7 @@
     - { home: "/home/{{ remote_user }}", user: "{{ remote_user }}", group: "{{ remote_user }}" }
     - { home: /root , user: root, group: root }
 
-- name: "deploy curlrc for root and {{ remote_user }}"
+- name: "Deploy curlrc for root and {{ remote_user }}"
   become: true
   template:
     src: curlrc
