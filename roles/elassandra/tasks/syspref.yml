@@ -39,6 +39,7 @@
     - { name: 'net.ipv4.tcp_wmem', value: '4096 65536 16777216' }
 
 - name: Disable Transparent Huge Pages defrag
+  become: true
   shell: echo never > /sys/kernel/mm/transparent_hugepage/defrag
   ignore_errors: true
 

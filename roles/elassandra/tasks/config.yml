@@ -46,6 +46,7 @@
     etype: user
     permissions: r
     state: present
+  become: true
   with_items:
     - centos
     - root
