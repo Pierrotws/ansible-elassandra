@@ -27,8 +27,8 @@ elassandra_password_admin: cassandra
 elassandra_pid_dir: "/var/run/cassandra"
 elassandra_env_file: "/etc/default/cassandra"
 
-elassandra_seed_list: "172.16.1.4"
-elassandra_num_token: 32
+elassandra_seed_list: "127.0.0.1"
+elassandra_num_token: 8
 elassandra_enable_udf: false
 
 cassandra_heapdump_dir: "/tmp"
