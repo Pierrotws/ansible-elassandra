@@ -10,7 +10,7 @@
     state: latest
     allow_downgrade: true
     validate_certs: no
-  become: true
+  become: yes
 
 - name: Download and unzip strapack
   unarchive:
@@ -18,10 +18,10 @@
     dest: /usr/share/cassandra
     remote_src: yes
     validate_certs: no
-  become: true
+  become: yes
 
 - name: Run strapack install.sh
   command: "/usr/share/cassandra/strapdata-enterprise-{{ strapack_version }}/install.sh"
   args:
     chdir: "/usr/share/cassandra/strapdata-enterprise-{{ strapack_version }}"
-  become: true
+  become: yes

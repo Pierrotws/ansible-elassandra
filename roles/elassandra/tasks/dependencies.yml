@@ -4,17 +4,19 @@
 
 #Since firewalld is mandatory
 - name: Install firewalld, Java, JNA
-  become: true
+  become: yes
   yum: 
     name: ['firewalld', 'java-1.8.0-openjdk', 'jna']
     state: latest
 
 - name: Install Python PIP, wget, curl, jemalloc, unzip
+  become: yes
   yum:
     name: ['python-pip','wget','curl','jemalloc','unzip','jq','pssh']
     state: latest
 
 - name: Install perf monitoring tools
+  become: yes
   yum:
     name: ['trafshow','sysstat','net-tools','iotop','dstat','htop','strace'] 
     state: latest
