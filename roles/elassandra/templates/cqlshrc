@@ -1,10 +1,12 @@
 [connection]
-factory = cqlshlib.ssl.ssl_transport_factory
+{% if elassandra_ssl|bool %}factory = cqlshlib.ssl.ssl_transport_factory{% endif %}
 hostname = {{ elassandra_listen_address }}
 
+{% if elassandra_ssl|bool %}
 [ssl]
 certfile = {{ elassandra_conf }}/cacert.pem
 validate = true
+{% endif %}
 
 [authentication]
 username = cassandra
