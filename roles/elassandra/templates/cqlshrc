@@ -7,5 +7,5 @@ certfile = {{ elassandra_conf }}/cacert.pem
 validate = true
 
 [authentication]
-username = admin
+username = cassandra
 password = {{ elassandra_password_admin }}
