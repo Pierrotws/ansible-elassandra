@@ -54,6 +54,7 @@
 #
 #network.host: 192.168.0.1
 #
+#
 # Set a custom port for HTTP:
 #
 #http.port: 9200
@@ -86,9 +87,7 @@
 # Require explicit names when deleting indices:
 #
 #action.destructive_requires_name: true
-transport.bind_host: 0.0.0.0
 jmx.enabled: true
-
 {% if elassandra_ssl|bool %}
 ssl.transport.enabled: true
 https.enabled: true
