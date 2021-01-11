@@ -100,6 +100,67 @@
     - /var/log/cassandra
     - /var/lib/cassandra
 
+- name: Ensure cassandra data directories exists
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: cassandra
+    group: cassandra
+    mode: 0755
+  with_items: elassandra_data_file_directories
+  when: elassandra_data_file_directories is defined
+
+- name: Ensure elassandra_metadata_directory exists
+  become: true
+  file:
+    path:  /mnt/cass_data_disks/data1/metadata
+    state: directory
+    owner: cassandra
+    group: cassandra
+    mode: 0755
+  when: elassandra_metadata_directory is defined
+
+- name: Ensure elassandra_hints_directory exists
+  become: true
+  file:
+    path:  /mnt/cass_data_disks/data1/hints
+    state: directory
+    owner: cassandra
+    group: cassandra
+    mode: 0755
+  when: elassandra_hints_directory is defined
+
+- name: Ensure elassandra_commitlog_directory exists
+  become: true
+  file:
+    path:  /mnt/cass_data_disks/data1/commitlog
+    state: directory
+    owner: cassandra
+    group: cassandra
+    mode: 0755
+  when: elassandra_commitlog_directory is defined
+
+- name: Ensure elassandra_cdc_raw_directory exists
+  become: true
+  file:
+    path:  /mnt/cass_data_disks/data1/cdc_raw
+    state: directory
+    owner: cassandra
+    group: cassandra
+    mode: 0755
+  when: elassandra_cdc_raw_directory is defined
+
+- name: Ensure elassandra_saved_caches_directory exists
+  become: true
+  file:
+    path:  /mnt/cass_data_disks/data1/saved_caches
+    state: directory
+    owner: cassandra
+    group: cassandra
+    mode: 0755
+  when: elassandra_saved_caches_directory is defined
+
 - name: Ensure .cassandra directory exists
   become: true
   file:
