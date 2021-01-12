@@ -12,6 +12,13 @@
     validate_certs: no
   become: yes
 
+- name: Link pylib for cqlsh
+  file:
+    src: "/usr/share/cassandra/pylib/cqlshlib"
+    dest: "/usr/lib/python2.7/site-packages/cqlshlib"
+    state: link
+  become: yes
+
 - name: Download and unzip strapack
   unarchive:
     src: "{{ strapack_zip_url }}"
