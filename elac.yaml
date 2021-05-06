@@ -1,0 +1,147 @@
+description: test
+scenarios:
+  sai:
+    - run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto errors=count
+    - run driver=cqlverify tags==phase:verify,type:pk cycles===TEMPLATE(rampup-cycles,10000000) threads=auto errors=count
+    - run driver=cql tags==phase:main,type:sai cycles===TEMPLATE(main-cycles,10000000) table=persons threads=auto errors=count
+    elassandra:
+    - run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto errors=count
+    - run driver=cqlverify tags==phase:verify,type:es cycles===TEMPLATE(rampup-cycles,10000000) threads=auto errors=count
+    - run driver=cql tags==phase:main,type:es cycles===TEMPLATE(main-cycles,10000000) threads=auto errors=count
+  solr:
+    - run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto errors=count
+    - run driver=cqlverify tags==phase:verify,type:solr cycles===TEMPLATE(rampup-cycles,10000000) threads=auto errors=count
+    - run driver=cql tags==phase:main,type:solr cycles===TEMPLATE(main-cycles,10000000) threads=auto errors=count
+bindings:
+  hash_id: ToHashedUUID()
+  hash_lastname: LastNames()
+  #IMPORTANT TO MATCH TEMPLATED VALUES
+  hash_firstname: Add(1); FirstNames()
+  es_query: Template('{"query":{"query_string":{"query":"lastname:{} AND firstname:{}"}}}', LastNames(), FirstNames())
+  solr_query: Template('lastname:{} AND firstname:{}', LastNames(), FirstNames())
+  es_id: Template('{"query":{"query_string":{"query":"id:{}"}}}', ToHashedUUID())
+  solr_id: Template('{"q":"id:{}"}', ToHashedUUID())
+blocks:
+  - name: create-schema
+    tags:
+      phase: schema
+      type: table
+    params:
+      prepared: false
+    statements:
+      - create-keyspace: |-
+          CREATE KEYSPACE IF NOT EXISTS <<keyspace:baselines>>
+          WITH replication = {'class': 'SimpleStrategy', 'replication_factor':'<<rf:1>>'}
+          AND durable_writes = true;
+      - create-table: |-
+          CREATE TABLE IF NOT EXISTS <<keyspace:baselines>>.<<table:persons>> (
+          id uuid,
+          firstname text,
+          lastname text,
+          PRIMARY KEY ((id))
+          );
+# blocks:
+#   - name: create-sai-index
+#     tags:
+#       phase: schema
+#       type: sai-index
+#     params:
+#       prepared: false
+#     statements:
+#       - create-index-lastname: |-
+#           CREATE CUSTOM INDEX <<keyspace:baselines>>_<<table:baselines>>_lastname_idx
+#           ON <<keyspace:baselines>>.<<table:cyclist_semi_pro>> (lastname) 
+#           USING 'StorageAttachedIndex' 
+#           WITH OPTIONS = {'case_sensitive': false, 'normalize': true }; 
+#       - create-index-firstname: |-
+#           CREATE CUSTOM INDEX <<keyspace:baselines>>_<<table:baselines>>_firstname_idx
+#           ON <<keyspace:baselines>>.<<table:cyclist_semi_pro>> (firstname) 
+#           USING 'StorageAttachedIndex' 
+#           WITH OPTIONS = {'case_sensitive': false, 'normalize': true }; 
+  - name: rampup-table
+    tags:
+      phase: rampup
+    params:
+      prepared: true
+      cl: '<<write_cl:LOCAL_QUORUM>>'
+      instrument: true
+    statements:
+      - insert-rampup: |-
+          INSERT INTO <<keyspace:baselines>>.<<table:persons>> (
+          id,
+          firstname,
+          lastname
+          ) VALUES (
+          {hash_id},
+          {hash_firstname},
+          {hash_lastname}
+          );
+  - name: verify-data 
+    tags:
+       phase: verify
+       type: pk
+    params:
+      prepared: true 
+      cl: <<read_cl:LOCAL_QUORUM>>
+      instrument: true
+    statements:
+      - verify-select: |
+           select id,firstname,lastname from <<keyspace:baselines>>.<<table:persons>> where id={hash_id};
+        verify-fields: id->hash_id, firstname->hash_lastname, lastname->hash_lastname
+        tags:
+          name: verify-pk
+  - name: verify-solr
+    tags:
+      phase: verify
+      type: solr
+    params:
+      cl: <<read_cl:LOCAL_ONE>>
+    statements:
+      - verify-select: |
+          select id,firstname,lastname from <<keyspace:baselines>>.<<table:persons>> where solr_query={solr_id};
+        verify-fields: id->hash_id, firstname->hash_firstname, lastname->hash_lastname
+        tags:
+           name: verify-solr
+  - name: verify-es
+    tags:
+      phase: verify
+      type: es
+    params:
+      cl: <<read_cl:LOCAL_ONE>>
+    statements:
+      - verify-select: |
+          select id,firstname,lastname from <<keyspace:baselines>>.<<table:persons>> where es_query={es_id};
+        verify-fields: id->hash_id, firstname->hash_firstname, lastname->hash_lastname
+        tags:
+           name: verify-es
+  - tags:
+      phase: main
+      type: es
+    params:
+      prepared: true
+      cl: '<<write_cl:LOCAL_ONE>>'
+      instrument: true
+    statements:
+      - es-query: |
+        SELECT id,firstname,lastname FROM <<keyspace:baselines>>.<<table:persons>> WHERE es_query={es_query};
+  - tags:
+      phase: main
+      type: solr
+    params:
+      prepared: true
+      cl: '<<write_cl:LOCAL_ONE>>'
+      instrument: true
+    statements:
+      - solr-query: |
+        SELECT id,firstname,lastname FROM <<keyspace:baselines>>.<<table:persons>> WHERE solr_query={solr_query};
+  - tags:
+      phase: main
+      type: sai
+    params:
+      prepared: true
+      cl: '<<write_cl:LOCAL_QUORUM>>'
+      instrument: true
+    statements:
+      - sai-query: |
+        SELECT id,firstname,lastname FROM <<keyspace:baselines>>.<<table:persons>> WHERE lastname={lastname} and firstname={firstname};
+

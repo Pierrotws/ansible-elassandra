@@ -1,0 +1,46 @@
+CREATE TABLE
+cqlsh>>>
+CREATE KEYSPACE IF NOT EXISTS toto WITH replication = {'class': 'NetworkTopologyStrategy', 'DC1': 1};
+CREATE TYPE IF NOT EXISTS toto.user_type (first text, last text);
+CREATE TABLE IF NOT EXISTS toto.docs (uid int, username frozen<user_type>, login text, PRIMARY KEY (uid));
+INSERT INTO toto.docs (uid, username, login) VALUES (0, {first:'Pierre',last:'Sauvage'}, 'pierrotws');
+INSERT INTO toto.docs (uid, username, login) VALUES (1, {first:'Vincent',last:'Royer'}, 'vroyer');
+<<<<
+
+
+CREATE ES INDEX FROM SCHEMA
+
+
+IN BASH:
+bash>>>
+curl -XPUT -H 'Content-Type: application/json' 'http://localhost:9200/toto' -d'{"mappings":{"docs":{"discover":".*"}}}'
+<<<<
+
+
+in CQL:
+cqlsh>>>
+CREATE CUSTOM INDEX elastic_docs_idx ON toto.docs () USING 'org.elassandra.index.ExtendedElasticSecondaryIndex';
+ALTER TABLE toto.docs ADD es_query text;
+ALTER TABLE toto.docs ADD es_options text;
+<<<<
+
+SELECT * FROM toto.docs WHERE es_query='{"query":{"query_string":{"query":"vroyer"}}}';
+
+// create and init table if not exists
+result = QueryProcessor.executeOnceInternal(String.format(Locale.ROOT, "SELECT * FROM system_schema.tables WHERE keyspace_name='%s' AND table_name = '%s'", elasticAdminKeyspaceName, ELASTIC_ADMIN_METADATA_TABLE));
+if (result.isEmpty()) {
+    try {
+        retry(() -> createElasticAdminMetaTable(), String.format(Locale.ROOT, "create table %s.%s", elasticAdminKeyspaceName, ELASTIC_ADMIN_METADATA_TABLE));
+        // insert first row if not exists
+        MetaData metaData = state().metaData();
+        String source = String.format(Locale.ROOT, "init table %s.%s", elasticAdminKeyspaceName, ELASTIC_ADMIN_METADATA_TABLE);
+        retry(() -> insertFirstMetaRow(metaData, source), source);
+    }  catch (Throwable e) {
+        logger.error((Supplier<?>) () -> new ParameterizedMessage("Failed to create or init table {}.{}", elasticAdminKeyspaceName, ELASTIC_ADMIN_METADATA_TABLE),e);
+    }
+}
+
+
+
+INSERT INTO elastic_admin.metadata_log (cluster_name, v, version, owner, source, ts) VALUES ('TestCluster', 0, 0, 6cab84b1-42d8-4098-a471-f2ca7e0771e3, 'init', dateOf(Now()))
+
